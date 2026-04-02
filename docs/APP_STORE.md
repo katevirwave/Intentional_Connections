@@ -17,19 +17,29 @@ If you already registered a different ID in [Apple Developer](https://developer.
 
 ## Commands (after you finish “What I need from you” below)
 
+**Paste one line at a time** (or use the blocks below exactly). In **zsh**, text after `#` on the same line as a command is **not** treated as a comment unless `interactivecomments` is on—pasting `npx eas init # comment` can trigger errors like `bad pattern: #` or `command not found: adds`.
+
 ```bash
 npm install
+```
+
+```bash
 npx eas login
+```
+
+Use your **Expo username** (e.g. `virwave_oam`) if email login fails. Reset password at [expo.dev](https://expo.dev) if needed.
+
+```bash
 npx eas init
 ```
 
-Link the project when prompted (creates `extra.eas.projectId` in `app.json`).
-
-**Production iOS binary**
+When prompted, link this repo to an EAS project. That **adds `extra.eas.projectId` to `app.json`**—commit that change to git.
 
 ```bash
 npm run build:ios
 ```
+
+Production `.ipa` for TestFlight / App Store.
 
 **Upload latest build to App Store Connect (after credentials are set up)**
 
