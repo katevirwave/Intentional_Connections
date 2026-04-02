@@ -1,0 +1,8 @@
+# Keep secrets and local noise out of EAS uploads
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.mobileprovision
+.DS_Store

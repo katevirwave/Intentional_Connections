@@ -10,6 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:e2e": "maestro test maestro/",
+    "build:ios": "eas build --platform ios --profile production",
+    "build:ios:preview": "eas build --platform ios --profile preview",
+    "submit:ios": "eas submit --platform ios --latest --profile production",
     "supabase": "supabase",
     "db:link": "supabase link",
     "db:push": "supabase db push",
@@ -46,6 +49,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "eas-cli": "^16.28.0",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.1.0",
     "jest": "^30.3.0",

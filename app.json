@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Intentional_Connections",
+    "name": "Intentional Connections",
     "slug": "Intentional_Connections",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,9 +14,17 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.intentionalconnections.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "CFBundleDisplayName": "Intentional Connections",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.intentionalconnections.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
