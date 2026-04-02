@@ -7,6 +7,7 @@ import {
 } from '@/lib/api';
 import { ageFromBirthDate } from '@/lib/age';
 import { RELATIONSHIP_LABELS } from '@/lib/questions';
+import { useDemoGuardRedirectToTabs } from '@/hooks/useDemoGuard';
 import { supabase } from '@/lib/supabase';
 import type { RelationshipType } from '@/lib/types';
 import { colors, font, radius, space } from '@/lib/theme';
@@ -25,6 +26,7 @@ import {
 const REL_OPTIONS: RelationshipType[] = ['romantic', 'friend', 'family', 'work', 'general'];
 
 export default function InviteScreen() {
+  useDemoGuardRedirectToTabs();
   const { connectionId } = useLocalSearchParams<{ connectionId: string }>();
   const [initialLoad, setInitialLoad] = useState(true);
   const [busy, setBusy] = useState(false);

@@ -8,6 +8,7 @@ import {
 } from '@/lib/api';
 import { tendencyLine } from '@/lib/questions';
 import { computeMeaningfulGaps } from '@/lib/scoring';
+import { useDemoGuardRedirectToTabs } from '@/hooks/useDemoGuard';
 import { supabase } from '@/lib/supabase';
 import { colors, font, radius, space } from '@/lib/theme';
 import { Stack, useLocalSearchParams } from 'expo-router';
@@ -15,6 +16,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function DifferentScreen() {
+  useDemoGuardRedirectToTabs();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
   const [gaps, setGaps] = useState<ReturnType<typeof computeMeaningfulGaps>>([]);

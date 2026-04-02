@@ -1,3 +1,4 @@
+import { useAppStore } from '@/lib/store';
 import { colors, font, radius, space } from '@/lib/theme';
 import { supabase } from '@/lib/supabase';
 import { Link, router, Stack } from 'expo-router';
@@ -14,6 +15,7 @@ import {
 } from 'react-native';
 
 export default function SignUpScreen() {
+  const exitDemoMode = useAppStore((s) => s.exitDemoMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,6 +32,7 @@ export default function SignUpScreen() {
       Alert.alert('Sign up failed', error.message);
       return;
     }
+    exitDemoMode();
     router.replace('/onboarding/name-dob');
   }
 

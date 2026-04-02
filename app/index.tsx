@@ -1,5 +1,6 @@
 import { fetchProfile } from '@/lib/api';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { useAppStore } from '@/lib/store';
 import { colors } from '@/lib/theme';
 import { Redirect, type Href } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -11,6 +12,11 @@ export default function Index() {
 
   useEffect(() => {
     void (async () => {
+      if (useAppStore.getState().demoMode) {
+        setHref('/(tabs)');
+        setReady(true);
+        return;
+      }
       if (!isSupabaseConfigured()) {
         setHref('/setup');
         setReady(true);

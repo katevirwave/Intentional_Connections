@@ -3,6 +3,7 @@ import {
   fetchConnectionBetweenUsers,
   lookupShareCode,
 } from '@/lib/api';
+import { useDemoGuardRedirectToTabs } from '@/hooks/useDemoGuard';
 import { supabase } from '@/lib/supabase';
 import { colors, font, radius, space } from '@/lib/theme';
 import { router, Stack } from 'expo-router';
@@ -19,6 +20,7 @@ import {
 } from 'react-native';
 
 export default function AddConnectionScreen() {
+  useDemoGuardRedirectToTabs();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
 

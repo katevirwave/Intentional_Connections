@@ -7,11 +7,13 @@ import {
   submitLikertResponse,
   submitTextResponse,
 } from '@/lib/api';
+import { DEMO_QUESTIONS, getNextDemoQuestion } from '@/lib/demoData';
 import { getSelfInsight } from '@/lib/questions';
-import { supabase } from '@/lib/supabase';
+import { useAppStore } from '@/lib/store';
 import { colors, font, radius, space } from '@/lib/theme';
-import { router, Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useSession } from '@/hooks/useSession';
+import { router, Stack, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -26,41 +28,65 @@ import {
 type Phase = 'load' | 'question' | 'insight' | 'done_today';
 
 export default function TodayQuestionScreen() {
+  const session = useSession();
+  const demoMode = useAppStore((s) => s.demoMode);
+  const addDemoLikert = useAppStore((s) => s.addDemoLikertResponse);
+  const addDemoText = useAppStore((s) => s.addDemoTextResponse);
+
   const [phase, setPhase] = useState<Phase>('load');
-  const [question, setQuestion] = useState<Awaited<ReturnType<typeof fetchQuestions>>[number] | null>(null);
+  const [question, setQuestion] = useState<(typeof DEMO_QUESTIONS)[number] | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [textAnswer, setTextAnswer] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    void (async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        router.replace('/(auth)/welcome');
-        return;
-      }
-      const [questions, responses] = await Promise.all([fetchQuestions(), fetchMyResponses(user.id)]);
-      const next = await getNextQuestionForUser(user.id, questions, responses);
+  const loadQuestion = useCallback(async () => {
+    if (session === undefined) {
+      return;
+    }
+    if (!session?.user) {
+      router.replace('/(auth)/welcome');
+      return;
+    }
+    setPhase('load');
+    const userId = session.user.id;
+    try {
+      const questions = demoMode ? DEMO_QUESTIONS : await fetchQuestions();
+      const responses = demoMode ? useAppStore.getState().demoResponses : await fetchMyResponses(userId);
+      const next = demoMode
+        ? getNextDemoQuestion(questions, responses)
+        : await getNextQuestionForUser(userId, questions, responses);
       if (!next) {
+        setQuestion(null);
         setPhase('done_today');
         return;
       }
       setQuestion(next);
+      setSelected(null);
+      setTextAnswer('');
       setPhase('question');
-    })();
-  }, []);
+    } catch (e: unknown) {
+      Alert.alert('Error', e instanceof Error ? e.message : 'Could not load question');
+      router.replace('/(tabs)');
+    }
+  }, [session, demoMode]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadQuestion();
+    }, [loadQuestion]),
+  );
 
   async function onSubmitLikert() {
-    if (!question || selected === null) return;
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!question || selected === null || !session?.user) return;
+    const userId = session.user.id;
     setSubmitting(true);
     try {
-      await submitLikertResponse(user.id, question.id, selected);
+      if (demoMode) {
+        addDemoLikert(question.id, selected);
+        setPhase('insight');
+        return;
+      }
+      await submitLikertResponse(userId, question.id, selected);
       setPhase('insight');
     } catch (e: unknown) {
       Alert.alert('Error', e instanceof Error ? e.message : 'Could not save');
@@ -70,19 +96,21 @@ export default function TodayQuestionScreen() {
   }
 
   async function onSubmitText() {
-    if (!question) return;
+    if (!question || !session?.user) return;
     const t = textAnswer.trim();
     if (t.length < 1) {
       Alert.alert('Answer', 'Please write something.');
       return;
     }
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
+    const userId = session.user.id;
     setSubmitting(true);
     try {
-      await submitTextResponse(user.id, question.id, t);
+      if (demoMode) {
+        addDemoText(question.id, t);
+        router.replace('/(tabs)');
+        return;
+      }
+      await submitTextResponse(userId, question.id, t);
       router.replace('/(tabs)');
     } catch (e: unknown) {
       Alert.alert('Error', e instanceof Error ? e.message : 'Could not save');
@@ -91,21 +119,16 @@ export default function TodayQuestionScreen() {
     }
   }
 
-  if (phase === 'load' || !question) {
-    return (
-      <View style={styles.center}>
-        <Stack.Screen options={{ title: 'Today' }} />
-        <ActivityIndicator size="large" color={colors.accent} />
-      </View>
-    );
-  }
-
   if (phase === 'done_today') {
     return (
       <View style={styles.centerPad}>
         <Stack.Screen options={{ title: 'Today' }} />
-        <Text style={styles.doneTitle}>You are set for today</Text>
-        <Text style={styles.doneBody}>Come back tomorrow for the next question.</Text>
+        <Text style={styles.doneTitle}>{demoMode ? 'Demo questions complete' : 'You are set for today'}</Text>
+        <Text style={styles.doneBody}>
+          {demoMode
+            ? 'Create an account to answer daily questions and connect with someone for real.'
+            : 'Come back tomorrow for the next question.'}
+        </Text>
         <Pressable style={styles.btn} onPress={() => router.replace('/(tabs)')} accessibilityRole="button">
           <Text style={styles.btnText}>Back home</Text>
         </Pressable>
@@ -113,9 +136,7 @@ export default function TodayQuestionScreen() {
     );
   }
 
-  const isIndividual = question.match_type === 'I';
-
-  if (phase === 'insight' && selected !== null) {
+  if (phase === 'insight' && selected !== null && question) {
     return (
       <ScrollView contentContainerStyle={styles.pad}>
         <Stack.Screen options={{ title: 'Insight' }} />
@@ -127,9 +148,23 @@ export default function TodayQuestionScreen() {
     );
   }
 
+  if (phase === 'load' || !question) {
+    return (
+      <View style={styles.center}>
+        <Stack.Screen options={{ title: 'Today' }} />
+        <ActivityIndicator size="large" color={colors.accent} />
+      </View>
+    );
+  }
+
+  const isIndividual = question.match_type === 'I';
+
   return (
     <ScrollView contentContainerStyle={styles.pad}>
       <Stack.Screen options={{ title: 'Today' }} />
+      {demoMode && (
+        <Text style={styles.demoHint}>Demo — this answer is stored only on this device.</Text>
+      )}
       {isIndividual ? (
         <>
           <Text style={styles.prompt}>{question.question}</Text>
@@ -178,6 +213,11 @@ const styles = StyleSheet.create({
     gap: space.md,
   },
   pad: { padding: space.lg, gap: space.md, backgroundColor: colors.bg },
+  demoHint: {
+    fontSize: font.caption,
+    color: colors.textMuted,
+    lineHeight: 18,
+  },
   prompt: {
     fontSize: font.body,
     lineHeight: 24,

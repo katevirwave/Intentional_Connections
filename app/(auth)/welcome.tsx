@@ -1,8 +1,16 @@
+import { useAppStore } from '@/lib/store';
 import { colors, font, radius, space } from '@/lib/theme';
-import { Link, Stack } from 'expo-router';
+import { Link, router, Stack } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function WelcomeScreen() {
+  const enterDemoMode = useAppStore((s) => s.enterDemoMode);
+
+  function onTryDemo() {
+    enterDemoMode();
+    router.replace('/(tabs)');
+  }
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -22,6 +30,16 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryText}>Log in</Text>
           </Pressable>
         </Link>
+        <Pressable
+          testID="welcome-demo"
+          style={styles.tertiary}
+          onPress={onTryDemo}
+          accessibilityRole="button"
+          accessibilityLabel="Try demo without logging in"
+        >
+          <Text style={styles.tertiaryText}>Try demo</Text>
+          <Text style={styles.tertiaryHint}>Explore the app without an account. Nothing is saved to the cloud.</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -80,5 +98,24 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: font.body,
     fontWeight: '600',
+  },
+  tertiary: {
+    marginTop: space.md,
+    paddingVertical: space.md,
+    paddingHorizontal: space.sm,
+    alignItems: 'center',
+    gap: space.xs,
+  },
+  tertiaryText: {
+    color: colors.accent,
+    fontSize: font.body,
+    fontWeight: '600',
+  },
+  tertiaryHint: {
+    color: colors.textMuted,
+    fontSize: font.caption,
+    textAlign: 'center',
+    lineHeight: 18,
+    paddingHorizontal: space.sm,
   },
 });

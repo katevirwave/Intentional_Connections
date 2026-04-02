@@ -1,8 +1,16 @@
-import { colors, font, space } from '@/lib/theme';
-import { Stack } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { useAppStore } from '@/lib/store';
+import { colors, font, radius, space } from '@/lib/theme';
+import { router, Stack } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function SetupScreen() {
+  const enterDemoMode = useAppStore((s) => s.enterDemoMode);
+
+  function onTryDemo() {
+    enterDemoMode();
+    router.replace('/(tabs)');
+  }
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Setup' }} />
@@ -15,6 +23,16 @@ export default function SetupScreen() {
         <Text style={styles.mono}>EXPO_PUBLIC_SUPABASE_ANON_KEY</Text> to a <Text style={styles.mono}>.env</Text> file
         (see <Text style={styles.mono}>.env.example</Text>). Restart Expo.
       </Text>
+      <Pressable
+        testID="setup-try-demo"
+        style={styles.demoBtn}
+        onPress={onTryDemo}
+        accessibilityRole="button"
+        accessibilityLabel="Try demo without Supabase"
+      >
+        <Text style={styles.demoBtnText}>Try demo anyway</Text>
+        <Text style={styles.demoHint}>Browse the UI with local sample data (no backend).</Text>
+      </Pressable>
     </View>
   );
 }
@@ -40,5 +58,27 @@ const styles = StyleSheet.create({
   mono: {
     fontFamily: 'Courier',
     color: colors.text,
+  },
+  demoBtn: {
+    marginTop: space.lg,
+    paddingVertical: space.md,
+    paddingHorizontal: space.lg,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.surface,
+    gap: space.xs,
+  },
+  demoBtnText: {
+    fontSize: font.body,
+    fontWeight: '600',
+    color: colors.accent,
+    textAlign: 'center',
+  },
+  demoHint: {
+    fontSize: font.caption,
+    color: colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });

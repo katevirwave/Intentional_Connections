@@ -18,6 +18,7 @@ import {
   computeCompatibility,
   dimensionsForRelationship,
 } from '@/lib/scoring';
+import { useDemoGuardRedirectToTabs } from '@/hooks/useDemoGuard';
 import { supabase } from '@/lib/supabase';
 import { colors, font, radius, space } from '@/lib/theme';
 import type { Dimension, QuestionRow } from '@/lib/types';
@@ -34,6 +35,7 @@ import {
 } from 'react-native';
 
 export default function ConnectionDetailScreen() {
+  useDemoGuardRedirectToTabs();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');

@@ -29,6 +29,7 @@ const REL_OPTIONS: RelationshipType[] = ['romantic', 'friend', 'family', 'work',
 
 export default function HomeScreen() {
   const session = useSession();
+  const demoMode = useAppStore((s) => s.demoMode);
   const userId = session?.user.id;
   const inviteRelationship = useAppStore((s) => s.inviteRelationship);
   const setInviteRelationship = useAppStore((s) => s.setInviteRelationship);
@@ -42,6 +43,12 @@ export default function HomeScreen() {
     if (!userId) return;
     setLoading(true);
     try {
+      if (demoMode) {
+        setMyAge(28);
+        setConnections([]);
+        setCode('DEMO-F1X');
+        return;
+      }
       const rel = useAppStore.getState().inviteRelationship;
       const [p, conns, sc] = await Promise.all([
         fetchProfile(userId),
@@ -57,7 +64,7 @@ export default function HomeScreen() {
     } finally {
       setLoading(false);
     }
-  }, [userId, setInviteRelationship]);
+  }, [userId, demoMode, setInviteRelationship]);
 
   useFocusEffect(
     useCallback(() => {
@@ -73,6 +80,9 @@ export default function HomeScreen() {
   async function onPickRelationship(r: RelationshipType) {
     if (!userId) return;
     setInviteRelationship(r);
+    if (demoMode) {
+      return;
+    }
     try {
       await updateShareRelationship(userId, r);
       const sc = await ensureShareCode(userId, r);
@@ -104,6 +114,11 @@ export default function HomeScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Home</Text>
+      {demoMode && (
+        <View style={styles.demoBanner}>
+          <Text style={styles.demoBannerText}>Demo mode — answers stay on this device only.</Text>
+        </View>
+      )}
       {loading ? (
         <ActivityIndicator color={colors.accent} style={{ marginVertical: space.lg }} />
       ) : (
@@ -149,14 +164,20 @@ export default function HomeScreen() {
           <View style={styles.card}>
             <View style={styles.rowBetween}>
               <Text style={styles.cardTitle}>Connections</Text>
-              <Link href="/connection/add" asChild>
-                <Pressable accessibilityRole="button">
-                  <Text style={styles.link}>Add</Text>
-                </Pressable>
-              </Link>
+              {!demoMode && (
+                <Link href="/connection/add" asChild>
+                  <Pressable accessibilityRole="button">
+                    <Text style={styles.link}>Add</Text>
+                  </Pressable>
+                </Link>
+              )}
             </View>
             {connections.length === 0 ? (
-              <Text style={styles.cardBody}>Share your code to connect with someone.</Text>
+              <Text style={styles.cardBody}>
+                {demoMode
+                  ? 'With a real account, people who use your code show up here.'
+                  : 'Share your code to connect with someone.'}
+              </Text>
             ) : (
               connections.map((c) => (
                 <ConnectionListRow key={c.id} c={c} me={userId} onOpen={() => router.push(`/connection/${c.id}`)} />
@@ -207,6 +228,15 @@ const styles = StyleSheet.create({
   container: { padding: space.lg, gap: space.md, backgroundColor: colors.bg, paddingBottom: space.xl * 2 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
   title: { fontSize: 28, fontWeight: '700', color: colors.text },
+  demoBanner: {
+    backgroundColor: colors.accentMuted,
+    paddingVertical: space.sm,
+    paddingHorizontal: space.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  demoBannerText: { fontSize: font.caption, color: colors.text, lineHeight: 18 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
