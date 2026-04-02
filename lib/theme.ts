@@ -1,16 +1,32 @@
 import type { TextStyle, ViewStyle } from 'react-native';
 
+/** Aligned with 100 App UI concept — deep purple system */
 export const colors = {
-  bg: '#F7F5F2',
+  bg: '#F5F3FF',
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
-  text: '#1C1917',
-  textMuted: '#57534E',
-  border: '#E7E5E4',
-  accent: '#0D9488',
-  accentDark: '#0F766E',
-  accentMuted: '#CCFBF1',
-  warn: '#C2410C',
+  text: '#0F0A1E',
+  textMuted: '#6B7280',
+  textMid: '#4B5563',
+  border: '#E5E7EB',
+  accent: '#7C3AED',
+  accentDark: '#5B21B6',
+  accentLight: '#A78BFA',
+  accentMuted: '#EDE9FE',
+  accentSoft: '#EDE9FE',
+  deepPurple: '#1A0A3B',
+  midPurple: '#2D1B69',
+  heroPurpleBottom: '#0D0520',
+  teal: '#0D9488',
+  warn: '#B45309',
+};
+
+export const gradients = {
+  hero: [colors.midPurple, colors.deepPurple, colors.heroPurpleBottom] as const,
+  heroShort: [colors.midPurple, colors.deepPurple] as const,
+  primaryCta: [colors.accent, colors.accentDark] as const,
+  avatar: [colors.accent, colors.accentDark] as const,
+  codePanel: [colors.midPurple, colors.deepPurple] as const,
 };
 
 /** Use after fonts load via useFonts (Plus Jakarta Sans / Inter). */
@@ -49,43 +65,53 @@ export const font = {
 /** iOS shadow + Android elevation */
 export const shadows = {
   sm: {
-    shadowColor: '#1C1917',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06,
     shadowRadius: 3,
     elevation: 2,
   } satisfies ViewStyle,
   md: {
-    shadowColor: '#1C1917',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 4,
   } satisfies ViewStyle,
   lg: {
-    shadowColor: '#1C1917',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
     elevation: 8,
   } satisfies ViewStyle,
+  cta: {
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
+  } satisfies ViewStyle,
 };
 
-/** Primary elevated cards: shadow, no border */
+/** Primary elevated cards: white, soft shadow (concept) */
 export const cardPrimary: ViewStyle = {
   backgroundColor: colors.surfaceElevated,
   borderRadius: radius.lg,
   padding: space.lg,
+  borderWidth: 1,
+  borderColor: 'rgba(0,0,0,0.04)',
   ...shadows.md,
 };
 
-/** Secondary / dense lists: border, no shadow */
+/** Secondary / dense lists */
 export const cardSecondary: ViewStyle = {
   backgroundColor: colors.surface,
   borderRadius: radius.lg,
   padding: space.lg,
   borderWidth: 1,
-  borderColor: colors.border,
+  borderColor: 'rgba(0,0,0,0.04)',
+  ...shadows.md,
 };
 
 export const textHeading = (size: number, weight: '600' | '700' = '700'): TextStyle => ({

@@ -5,7 +5,6 @@ import {
   updateShareRelationship,
 } from '@/lib/api';
 import { RelationshipChip } from '@/components/RelationshipChip';
-import { SectionHeader } from '@/components/SectionHeader';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { ageFromBirthDate } from '@/lib/age';
 import { hapticLight, hapticSelect } from '@/lib/haptics';
@@ -14,11 +13,10 @@ import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/lib/store';
 import type { ConnectionRow, RelationshipType } from '@/lib/types';
 import {
-  cardPrimary,
-  cardSecondary,
   colors,
   font,
   fontFamily,
+  gradients,
   radius,
   shadows,
   space,
@@ -26,6 +24,7 @@ import {
 import { useSession } from '@/hooks/useSession';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link, router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
@@ -38,10 +37,19 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const REL_OPTIONS: RelationshipType[] = ['romantic', 'friend', 'family', 'work', 'general'];
 
+function timeGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
   const session = useSession();
   const demoMode = useAppStore((s) => s.demoMode);
   const userId = session?.user.id;
@@ -128,89 +136,119 @@ export default function HomeScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Home</Text>
-      {demoMode && (
-        <View style={styles.demoBanner}>
-          <Text style={styles.demoBannerText}>Demo mode — answers stay on this device only.</Text>
-        </View>
-      )}
-      {loading ? (
-        <ActivityIndicator color={colors.accent} style={{ marginVertical: space.lg }} />
-      ) : (
-        <>
-          <View style={styles.cardPrimary}>
-            <SectionHeader title="Today&apos;s question" />
-            <Text style={styles.cardBody}>One short question, about thirty seconds.</Text>
-            <PrimaryButton label="Open today&apos;s question" onPress={() => router.push('/question/today')} />
-          </View>
+    <View style={styles.screenRoot}>
+      <LinearGradient
+        colors={[...gradients.heroShort]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.35, y: 1 }}
+        style={[styles.hero, { paddingTop: insets.top + 20 }]}
+      >
+        <View style={styles.heroOrb} />
+        <Text style={styles.greeting}>{timeGreeting()}</Text>
+        <Text testID="home-screen-title" style={styles.heroTitle}>
+          Home
+        </Text>
+      </LinearGradient>
 
-          <View style={styles.cardSecondary}>
-            <SectionHeader title="Your invite" />
-            <Text style={styles.cardBody}>
-              Choose how you know them before you share — this sets the default for your link.
-            </Text>
-            <View style={styles.relRow}>
-              {relOptions.map((r) => (
-                <RelationshipChip
-                  key={r}
-                  label={RELATIONSHIP_LABELS[r]}
-                  selected={inviteRelationship === r}
-                  onPress={() => void onPickRelationship(r)}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.container, { paddingBottom: insets.bottom + space.xl * 2 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {demoMode && (
+          <View style={styles.demoBanner}>
+            <Text style={styles.demoBannerText}>Demo mode — answers stay on this device only.</Text>
+          </View>
+        )}
+        {loading ? (
+          <ActivityIndicator color={colors.accent} style={{ marginVertical: space.lg }} />
+        ) : (
+          <>
+            <View style={styles.card}>
+              <View style={styles.dailyRow}>
+                <View style={styles.dailyIcon}>
+                  <Text style={styles.dailyIconGlyph}>✦</Text>
+                </View>
+                <View style={styles.dailyTitles}>
+                  <Text style={styles.kicker}>Daily question</Text>
+                  <Text style={styles.cardTitle}>Today&apos;s question</Text>
+                </View>
+              </View>
+              <Text style={styles.cardBody}>One short question, about thirty seconds.</Text>
+              <PrimaryButton label="Answer now" onPress={() => router.push('/question/today')} />
+            </View>
+
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Your invite</Text>
+              <Text style={styles.cardBody}>
+                Choose how you know them before you share — this sets the default for your link.
+              </Text>
+              <View style={styles.relRow}>
+                {relOptions.map((r) => (
+                  <RelationshipChip
+                    key={r}
+                    label={RELATIONSHIP_LABELS[r]}
+                    selected={inviteRelationship === r}
+                    onPress={() => void onPickRelationship(r)}
+                  />
+                ))}
+              </View>
+              <View style={styles.codePanel}>
+                <LinearGradient
+                  colors={[...gradients.codePanel]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
                 />
-              ))}
+                <View style={styles.codeOrb} />
+                <Text style={styles.codeLabel}>Your code</Text>
+                <Text style={styles.code}>{code ?? '—'}</Text>
+              </View>
+              <View style={styles.row}>
+                <Pressable
+                  style={[styles.copyBtn, shadows.sm]}
+                  onPress={() => void copyCode()}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.copyBtnText}>Copy code</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.shareBtn}
+                  onPress={() => void shareOut()}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.shareBtnText}>Share link</Text>
+                </Pressable>
+              </View>
             </View>
-            <View style={styles.codeBox}>
-              <Text style={styles.code}>{code ?? '—'}</Text>
-            </View>
-            <View style={styles.row}>
-              <Pressable
-                style={[styles.secondaryBtn, shadows.sm]}
-                onPress={() => void copyCode()}
-                accessibilityRole="button"
-              >
-                <Ionicons name="copy-outline" size={18} color={colors.accent} style={styles.btnIcon} />
-                <Text style={styles.secondaryBtnText}>Copy code</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.secondaryBtn, shadows.sm]}
-                onPress={() => void shareOut()}
-                accessibilityRole="button"
-              >
-                <Ionicons name="share-outline" size={18} color={colors.accent} style={styles.btnIcon} />
-                <Text style={styles.secondaryBtnText}>Share link</Text>
-              </Pressable>
-            </View>
-          </View>
 
-          <View style={styles.cardSecondary}>
-            <SectionHeader
-              title="Connections"
-              right={
-                !demoMode ? (
+            <View style={styles.card}>
+              <View style={styles.connectionsHeader}>
+                <Text style={styles.cardTitle}>Connections</Text>
+                {!demoMode ? (
                   <Link href="/connection/add" asChild>
                     <Pressable accessibilityRole="button">
                       <Text style={styles.link}>Add</Text>
                     </Pressable>
                   </Link>
-                ) : null
-              }
-            />
-            {connections.length === 0 ? (
-              <Text style={styles.cardBody}>
-                {demoMode
-                  ? 'With a real account, people who use your code show up here.'
-                  : 'Share your code to connect with someone.'}
-              </Text>
-            ) : (
-              connections.map((c) => (
-                <ConnectionListRow key={c.id} c={c} me={userId} onOpen={() => router.push(`/connection/${c.id}`)} />
-              ))
-            )}
-          </View>
-        </>
-      )}
-    </ScrollView>
+                ) : null}
+              </View>
+              {connections.length === 0 ? (
+                <Text style={styles.cardBody}>
+                  {demoMode
+                    ? 'With a real account, people who use your code show up here.'
+                    : 'Share your code to connect with someone.'}
+                </Text>
+              ) : (
+                connections.map((c) => (
+                  <ConnectionListRow key={c.id} c={c} me={userId} onOpen={() => router.push(`/connection/${c.id}`)} />
+                ))
+              )}
+            </View>
+          </>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -237,6 +275,7 @@ function ConnectionListRow({
 
   const mine = c.user_a === me ? c.relationship_type_a : c.relationship_type_b;
   const label = mine ? CONNECTION_UI_LABEL[mine] : c.status === 'pending' ? 'Pending' : 'Connection';
+  const initial = name.trim().slice(0, 1).toUpperCase() || '?';
 
   return (
     <Pressable
@@ -247,6 +286,14 @@ function ConnectionListRow({
       }}
       accessibilityRole="button"
     >
+      <LinearGradient
+        colors={[...gradients.avatar]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.connAvatar}
+      >
+        <Text style={styles.connAvatarText}>{initial}</Text>
+      </LinearGradient>
       <View style={styles.connText}>
         <Text style={styles.connName}>{name}</Text>
         <Text style={styles.connMeta}>
@@ -259,14 +306,44 @@ function ConnectionListRow({
 }
 
 const styles = StyleSheet.create({
-  container: { padding: space.lg, gap: space.md, backgroundColor: colors.bg, paddingBottom: space.xl * 2 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
-  title: {
-    fontFamily: fontFamily.heading,
-    fontSize: font.display,
-    fontWeight: '700',
-    color: colors.text,
+  screenRoot: {
+    flex: 1,
+    backgroundColor: colors.bg,
   },
+  hero: {
+    paddingHorizontal: space.lg,
+    paddingBottom: space.lg + 8,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  heroOrb: {
+    position: 'absolute',
+    top: -30,
+    right: -30,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(124,58,237,0.2)',
+  },
+  greeting: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: font.small,
+    fontWeight: '500',
+    color: colors.accentLight,
+    marginBottom: 4,
+  },
+  heroTitle: {
+    fontFamily: fontFamily.heading,
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: -0.5,
+  },
+  scroll: {
+    flex: 1,
+  },
+  container: { padding: space.lg, gap: space.md, paddingTop: space.md },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
   demoBanner: {
     backgroundColor: colors.accentMuted,
     paddingVertical: space.sm,
@@ -282,59 +359,132 @@ const styles = StyleSheet.create({
     color: colors.text,
     lineHeight: 18,
   },
-  cardPrimary: {
-    ...cardPrimary,
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: space.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.04)',
     gap: space.sm,
+    ...shadows.md,
   },
-  cardSecondary: {
-    ...cardSecondary,
+  dailyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: space.sm,
+    marginBottom: 4,
+  },
+  dailyIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: colors.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dailyIconGlyph: {
+    fontSize: 18,
+    color: colors.accent,
+  },
+  dailyTitles: {
+    flex: 1,
+  },
+  kicker: {
+    fontFamily: fontFamily.bodySemi,
+    fontSize: font.caption,
+    fontWeight: '600',
+    color: colors.textMuted,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  cardTitle: {
+    fontFamily: fontFamily.bodySemi,
+    fontSize: font.small,
+    fontWeight: '700',
+    color: colors.text,
   },
   cardBody: {
     fontFamily: fontFamily.body,
     fontSize: font.small,
     fontWeight: '400',
     lineHeight: 20,
-    color: colors.textMuted,
+    color: colors.textMid,
   },
   relRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs },
-  codeBox: {
+  codePanel: {
     marginTop: space.sm,
-    paddingVertical: space.md,
-    paddingHorizontal: space.md,
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: colors.border,
-    backgroundColor: colors.bg,
+    paddingVertical: space.lg,
+    paddingHorizontal: space.md,
+    alignItems: 'center',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  codeOrb: {
+    position: 'absolute',
+    top: -20,
+    right: -20,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(124,58,237,0.3)',
+  },
+  codeLabel: {
+    fontFamily: fontFamily.bodySemi,
+    fontSize: 11,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.5)',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+    zIndex: 1,
   },
   code: {
     fontFamily: fontFamily.heading,
     fontSize: 28,
     fontWeight: '800',
-    letterSpacing: 2,
-    color: colors.text,
+    letterSpacing: 4,
+    color: '#fff',
     textAlign: 'center',
+    zIndex: 1,
   },
   row: { flexDirection: 'row', gap: space.sm, marginTop: space.sm },
-  secondaryBtn: {
+  copyBtn: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: space.sm,
+    paddingVertical: 13,
     borderRadius: radius.md,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border,
     backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  btnIcon: { marginRight: 2 },
-  secondaryBtnText: {
+  copyBtnText: {
     fontFamily: fontFamily.bodySemi,
     fontWeight: '600',
     color: colors.text,
     fontSize: font.small,
+  },
+  shareBtn: {
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: radius.md,
+    backgroundColor: colors.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  shareBtnText: {
+    fontFamily: fontFamily.bodySemi,
+    fontWeight: '700',
+    color: colors.accent,
+    fontSize: font.small,
+  },
+  connectionsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   link: {
     fontFamily: fontFamily.bodySemi,
@@ -345,23 +495,34 @@ const styles = StyleSheet.create({
   connRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: space.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    gap: space.sm,
+    gap: 12,
+    paddingVertical: 12,
+    marginTop: 4,
+    borderRadius: radius.md,
+    backgroundColor: colors.bg,
+    paddingHorizontal: 12,
   },
   connRowPressed: {
-    backgroundColor: colors.accentMuted,
-    marginHorizontal: -space.sm,
-    paddingHorizontal: space.sm,
-    borderRadius: radius.sm,
+    opacity: 0.92,
+  },
+  connAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  connAvatarText: {
+    fontFamily: fontFamily.heading,
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#fff',
   },
   connText: { flex: 1 },
   connName: {
     fontFamily: fontFamily.bodySemi,
-    fontSize: font.body,
-    fontWeight: '600',
+    fontSize: font.small,
+    fontWeight: '700',
     color: colors.text,
   },
   connMeta: {

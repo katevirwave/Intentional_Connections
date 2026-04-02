@@ -15,6 +15,16 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(fromEnv && fromKeyEnv);
 }
 
+/** Hostname from `EXPO_PUBLIC_SUPABASE_URL` (e.g. `abcd.supabase.co`) for debugging auth issues. */
+export function getConfiguredSupabaseHost(): string | null {
+  if (!fromEnv) return null;
+  try {
+    return new URL(fromEnv).hostname;
+  } catch {
+    return null;
+  }
+}
+
 // createClient throws on empty URL; use placeholders so the app can render /setup without .env.
 const supabaseUrl = fromEnv || 'https://placeholder.supabase.co';
 const supabaseAnonKey =

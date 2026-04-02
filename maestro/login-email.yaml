@@ -1,0 +1,33 @@
+# Email/password login (real Supabase). Account must already have a profile (first_name)
+# so the app routes to Home, not onboarding.
+#
+#   maestro test maestro/login-email.yaml \
+#     -e EXPO_DEV_URL="exp://127.0.0.1:8081" \
+#     -e MAESTRO_EMAIL="you@example.com" \
+#     -e MAESTRO_PASSWORD="your-password"
+
+appId: host.exp.Exponent
+---
+- openLink: ${EXPO_DEV_URL}
+- extendedWaitUntil:
+    visible:
+      id: welcome-tagline
+    timeout: 120000
+- tapOn:
+    id: welcome-log-in
+- extendedWaitUntil:
+    visible:
+      id: login-email
+    timeout: 30000
+- tapOn:
+    id: login-email
+- inputText: ${MAESTRO_EMAIL}
+- tapOn:
+    id: login-password
+- inputText: ${MAESTRO_PASSWORD}
+- tapOn:
+    id: login-submit
+- extendedWaitUntil:
+    visible:
+      id: home-screen-title
+    timeout: 120000

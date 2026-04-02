@@ -1,0 +1,25 @@
+# Welcome → Try demo → Home, OR already on Home (saved session / slow redirect).
+#
+#   npm run test:e2e
+#
+# appId: Expo Go. Dev build: change appId to your bundle id.
+
+appId: host.exp.Exponent
+---
+- openLink: ${EXPO_DEV_URL}
+- extendedWaitUntil:
+    visible:
+      id: home-screen-title
+    optional: true
+    timeout: 90000
+- runFlow:
+    when:
+      visible:
+        id: welcome-tagline
+    commands:
+      - tapOn:
+          id: welcome-demo
+- extendedWaitUntil:
+    visible:
+      id: home-screen-title
+    timeout: 120000

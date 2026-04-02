@@ -154,7 +154,7 @@ export default function TodayQuestionScreen() {
   const isIndividual = question.match_type === 'I';
 
   return (
-    <ScrollView contentContainerStyle={styles.pad}>
+    <ScrollView testID="question-today-screen" contentContainerStyle={styles.pad}>
       <Stack.Screen options={{ title: 'Today' }} />
       <Animated.View entering={FadeIn.duration(320)} style={styles.fadeCol}>
         {demoMode && (

@@ -1,4 +1,5 @@
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { SocialAuthButtons } from '@/components/SocialAuthButtons';
 import { useAppStore } from '@/lib/store';
 import { colors, font, fontFamily, radius, space } from '@/lib/theme';
 import { supabase } from '@/lib/supabase';
@@ -44,8 +45,10 @@ export default function SignUpScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <Stack.Screen options={{ title: 'Create account' }} />
+      <SocialAuthButtons onSuccess={exitDemoMode} />
       <Text style={styles.label}>Email</Text>
       <TextInput
+        testID="signup-email"
         style={[styles.input, emailFocused && styles.inputFocused]}
         autoCapitalize="none"
         keyboardType="email-address"
@@ -59,6 +62,7 @@ export default function SignUpScreen() {
       />
       <Text style={styles.label}>Password</Text>
       <TextInput
+        testID="signup-password"
         style={[styles.input, passwordFocused && styles.inputFocused]}
         secureTextEntry
         value={password}
@@ -70,6 +74,7 @@ export default function SignUpScreen() {
       />
       <PrimaryButton
         label={loading ? 'Creating…' : 'Continue'}
+        testID="signup-submit"
         onPress={() => void onSubmit()}
         disabled={loading}
         style={styles.btnTop}

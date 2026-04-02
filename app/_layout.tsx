@@ -9,11 +9,13 @@ import {
 import { PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold } from '@expo-google-fonts/plus-jakarta-sans';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import * as WebBrowser from 'expo-web-browser';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 void SplashScreen.preventAutoHideAsync();
+WebBrowser.maybeCompleteAuthSession();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -45,7 +47,21 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colors.bg },
           headerTitleStyle: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 17 },
         }}
-      />
+      >
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+            title: 'Home',
+          }}
+        />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="question" options={{ headerShown: false }} />
+        <Stack.Screen name="connection" options={{ headerShown: false }} />
+        <Stack.Screen name="setup" options={{ title: 'Setup' }} />
+      </Stack>
     </QueryProvider>
   );
 }

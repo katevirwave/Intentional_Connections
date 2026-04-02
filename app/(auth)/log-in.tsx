@@ -1,4 +1,5 @@
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { SocialAuthButtons } from '@/components/SocialAuthButtons';
 import { useAppStore } from '@/lib/store';
 import { colors, font, fontFamily, radius, space } from '@/lib/theme';
 import { supabase } from '@/lib/supabase';
@@ -40,8 +41,10 @@ export default function LogInScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <Stack.Screen options={{ title: 'Log in' }} />
+      <SocialAuthButtons onSuccess={exitDemoMode} />
       <Text style={styles.label}>Email</Text>
       <TextInput
+        testID="login-email"
         style={[styles.input, emailFocused && styles.inputFocused]}
         autoCapitalize="none"
         keyboardType="email-address"
@@ -54,6 +57,7 @@ export default function LogInScreen() {
       />
       <Text style={styles.label}>Password</Text>
       <TextInput
+        testID="login-password"
         style={[styles.input, passwordFocused && styles.inputFocused]}
         secureTextEntry
         value={password}
@@ -65,6 +69,7 @@ export default function LogInScreen() {
       />
       <PrimaryButton
         label={loading ? 'Signing in…' : 'Log in'}
+        testID="login-submit"
         onPress={() => void onSubmit()}
         disabled={loading}
         style={styles.btnTop}

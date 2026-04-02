@@ -1,5 +1,6 @@
 import { hapticSelect } from '@/lib/haptics';
-import { colors, font, fontFamily, radius, space } from '@/lib/theme';
+import { colors, font, fontFamily, gradients, space } from '@/lib/theme';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
@@ -18,10 +19,38 @@ export function RelationshipChip({ label, selected, onPress }: Props) {
     transform: [{ scale: scale.value }],
   }));
 
+  if (selected) {
+    return (
+      <AnimatedPressable
+        accessibilityRole="button"
+        accessibilityState={{ selected: true }}
+        onPress={() => {
+          hapticSelect();
+          onPress();
+        }}
+        onPressIn={() => {
+          scale.value = withSpring(0.94, { damping: 14, stiffness: 400 });
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1.03, { damping: 12, stiffness: 220 });
+        }}
+        style={[styles.chipSelectedOuter, animatedStyle]}
+      >
+        <LinearGradient
+          colors={[...gradients.primaryCta]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <Text style={styles.textOnGradient}>{label}</Text>
+      </AnimatedPressable>
+    );
+  }
+
   return (
     <AnimatedPressable
       accessibilityRole="button"
-      accessibilityState={{ selected }}
+      accessibilityState={{ selected: false }}
       onPress={() => {
         hapticSelect();
         onPress();
@@ -30,37 +59,42 @@ export function RelationshipChip({ label, selected, onPress }: Props) {
         scale.value = withSpring(0.94, { damping: 14, stiffness: 400 });
       }}
       onPressOut={() => {
-        scale.value = withSpring(selected ? 1.03 : 1, { damping: 12, stiffness: 220 });
+        scale.value = withSpring(1, { damping: 12, stiffness: 220 });
       }}
-      style={[styles.chip, selected && styles.chipOn, animatedStyle]}
+      style={[styles.chip, animatedStyle]}
     >
-      <Text style={[styles.text, selected && styles.textOn]}>{label}</Text>
+      <Text style={styles.text}>{label}</Text>
     </AnimatedPressable>
   );
 }
 
 const styles = StyleSheet.create({
   chip: {
-    paddingVertical: space.xs,
-    paddingHorizontal: space.sm,
-    borderRadius: radius.sm,
-    borderWidth: 1,
+    paddingVertical: space.xs + 2,
+    paddingHorizontal: space.sm + 4,
+    borderRadius: 999,
+    borderWidth: 1.5,
     borderColor: colors.border,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
   },
-  chipOn: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accentMuted,
+  chipSelectedOuter: {
+    paddingVertical: space.xs + 2,
+    paddingHorizontal: space.sm + 4,
+    borderRadius: 999,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   text: {
     fontFamily: fontFamily.bodyMedium,
     fontSize: font.caption,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.textMid,
   },
-  textOn: {
+  textOnGradient: {
     fontFamily: fontFamily.bodySemi,
-    fontWeight: '600',
-    color: colors.accent,
+    fontSize: font.caption,
+    fontWeight: '700',
+    color: '#fff',
   },
 });

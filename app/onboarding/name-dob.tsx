@@ -64,6 +64,7 @@ export default function NameDobScreen() {
 
   return (
     <KeyboardAvoidingView
+      testID="onboarding-about-you"
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
@@ -75,6 +76,7 @@ export default function NameDobScreen() {
       </Text>
       <Text style={styles.label}>Your first name</Text>
       <TextInput
+        testID="onboarding-first-name"
         style={[styles.input, nameFocused && styles.inputFocused]}
         value={firstName}
         onChangeText={setFirstName}
@@ -85,6 +87,7 @@ export default function NameDobScreen() {
       />
       <Text style={styles.label}>Your birthday (age is shown, not full date)</Text>
       <TextInput
+        testID="onboarding-birth-date"
         style={[styles.input, dobFocused && styles.inputFocused]}
         value={birthDate}
         onChangeText={setBirthDate}
@@ -96,6 +99,7 @@ export default function NameDobScreen() {
       />
       <PrimaryButton
         label={loading ? 'Saving…' : 'Continue'}
+        testID="onboarding-submit"
         onPress={() => void onContinue()}
         disabled={loading}
         style={styles.btnTop}

@@ -1,0 +1,12 @@
+# When EXPO_PUBLIC_SUPABASE_* are unset in the dev bundle, app shows Setup.
+#
+#   npx expo start --port 8081
+#   maestro test maestro/smoke-setup.yaml -e EXPO_DEV_URL="exp://127.0.0.1:8081"
+
+appId: host.exp.Exponent
+---
+- openLink: ${EXPO_DEV_URL}
+- extendedWaitUntil:
+    visible:
+      id: setup-missing-supabase
+    timeout: 120000

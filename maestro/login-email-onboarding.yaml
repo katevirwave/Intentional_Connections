@@ -1,0 +1,46 @@
+# Login then complete “About you” if shown; ends on Today’s question screen.
+# Use a Supabase user that exists but has no profile row / empty first_name.
+#
+#   maestro test maestro/login-email-onboarding.yaml \
+#     -e EXPO_DEV_URL="exp://127.0.0.1:8081" \
+#     -e MAESTRO_EMAIL="..." \
+#     -e MAESTRO_PASSWORD="..."
+
+appId: host.exp.Exponent
+---
+- openLink: ${EXPO_DEV_URL}
+- extendedWaitUntil:
+    visible:
+      id: welcome-tagline
+    timeout: 120000
+- tapOn:
+    id: welcome-log-in
+- extendedWaitUntil:
+    visible:
+      id: login-email
+    timeout: 30000
+- tapOn:
+    id: login-email
+- inputText: ${MAESTRO_EMAIL}
+- tapOn:
+    id: login-password
+- inputText: ${MAESTRO_PASSWORD}
+- tapOn:
+    id: login-submit
+- runFlow:
+    when:
+      visible:
+        id: onboarding-about-you
+    commands:
+      - tapOn:
+          id: onboarding-first-name
+      - inputText: ${MAESTRO_FIRST_NAME:-Maestro}
+      - tapOn:
+          id: onboarding-birth-date
+      - inputText: 1990-06-15
+      - tapOn:
+          id: onboarding-submit
+- extendedWaitUntil:
+    visible:
+      id: question-today-screen
+    timeout: 120000
