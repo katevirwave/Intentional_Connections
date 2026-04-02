@@ -1,6 +1,7 @@
 import { DimensionBar } from '@/components/DimensionBar';
 import { IndividualAnswerCard } from '@/components/IndividualAnswerCard';
 import { ScoreCard } from '@/components/ScoreCard';
+import { SectionHeader } from '@/components/SectionHeader';
 import {
   fetchAnswerReads,
   fetchConnectionById,
@@ -19,8 +20,9 @@ import {
   dimensionsForRelationship,
 } from '@/lib/scoring';
 import { useDemoGuardRedirectToTabs } from '@/hooks/useDemoGuard';
+import { hapticLight } from '@/lib/haptics';
 import { supabase } from '@/lib/supabase';
-import { colors, font, radius, space } from '@/lib/theme';
+import { cardSecondary, colors, font, fontFamily, radius, shadows, space } from '@/lib/theme';
 import type { Dimension, QuestionRow } from '@/lib/types';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -153,11 +155,11 @@ export default function ConnectionDetailScreen() {
       ) : (
         <>
           <ScoreCard name={name} overall={overall} sharedCount={shared} />
-          <Text style={styles.section}>Dimensions</Text>
+          <SectionHeader title="Dimensions" />
           <Text style={styles.disclaimer}>
             Based on what you&apos;ve both shared so far. Your scores can change as you share more.
           </Text>
-          <View style={styles.card}>
+          <View style={styles.dimCard}>
             {dims.map((d) => (
               <DimensionBar
                 key={d}
@@ -168,15 +170,18 @@ export default function ConnectionDetailScreen() {
             ))}
           </View>
           <Pressable
-            style={styles.secondaryBtn}
-            onPress={() => router.push(`/connection/${String(id)}/different`)}
+            style={[styles.secondaryBtn, shadows.sm]}
+            onPress={() => {
+              hapticLight();
+              router.push(`/connection/${String(id)}/different`);
+            }}
             accessibilityRole="button"
           >
             <Text style={styles.secondaryBtnText}>See what&apos;s different</Text>
           </Pressable>
           {ipItems.length > 0 && (
-            <>
-              <Text style={styles.section}>Individual preferences</Text>
+            <View style={styles.ipBlock}>
+              <SectionHeader title="Individual preferences" />
               {ipItems.map(({ q, text }) => (
                 <IndividualAnswerCard
                   key={q.id}
@@ -186,7 +191,7 @@ export default function ConnectionDetailScreen() {
                   onMarkRead={() => void onMarkRead(q.id)}
                 />
               ))}
-            </>
+            </View>
           )}
         </>
       )}
@@ -197,17 +202,30 @@ export default function ConnectionDetailScreen() {
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
   container: { padding: space.lg, gap: space.md, backgroundColor: colors.bg, paddingBottom: space.xl * 2 },
-  meta: { fontSize: font.small, color: colors.textMuted },
-  muted: { fontSize: font.body, color: colors.textMuted },
-  section: { fontSize: font.body, fontWeight: '700', color: colors.text },
-  disclaimer: { fontSize: font.caption, lineHeight: 18, color: colors.textMuted },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: space.md,
-    borderWidth: 1,
-    borderColor: colors.border,
+  meta: {
+    fontFamily: fontFamily.body,
+    fontSize: font.small,
+    fontWeight: '400',
+    color: colors.textMuted,
   },
+  muted: {
+    fontFamily: fontFamily.body,
+    fontSize: font.body,
+    fontWeight: '400',
+    color: colors.textMuted,
+  },
+  disclaimer: {
+    fontFamily: fontFamily.body,
+    fontSize: font.caption,
+    fontWeight: '400',
+    lineHeight: 18,
+    color: colors.textMuted,
+  },
+  dimCard: {
+    ...cardSecondary,
+    padding: space.md,
+  },
+  ipBlock: { gap: space.md },
   secondaryBtn: {
     paddingVertical: space.md,
     borderRadius: radius.md,
@@ -216,5 +234,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  secondaryBtnText: { fontWeight: '600', color: colors.text, fontSize: font.body },
+  secondaryBtnText: {
+    fontFamily: fontFamily.bodySemi,
+    fontWeight: '600',
+    color: colors.text,
+    fontSize: font.body,
+  },
 });

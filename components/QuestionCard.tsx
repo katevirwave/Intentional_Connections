@@ -1,5 +1,7 @@
-import { colors, font, radius, space } from '@/lib/theme';
+import { hapticLight } from '@/lib/haptics';
+import { cardPrimary, colors, font, fontFamily, radius, space } from '@/lib/theme';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 type Props = {
   question: string;
@@ -9,6 +11,46 @@ type Props = {
 };
 
 const labels = ['1', '2', '3', '4', '5'];
+
+function ScalePill({
+  v,
+  active,
+  disabled,
+  onSelect,
+}: {
+  v: number;
+  active: boolean;
+  disabled?: boolean;
+  onSelect: (v: number) => void;
+}) {
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View style={[styles.pillWrap, animatedStyle]}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ selected: active, disabled }}
+        disabled={disabled}
+        onPress={() => {
+          hapticLight();
+          onSelect(v);
+        }}
+        onPressIn={() => {
+          scale.value = withSpring(0.92, { damping: 16, stiffness: 400 });
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1, { damping: 12, stiffness: 280 });
+        }}
+        style={[styles.pill, active && styles.pillActive, disabled && styles.pillDisabled]}
+      >
+        <Text style={[styles.pillText, active && styles.pillTextActive]}>{v}</Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
 
 export function QuestionCard({ question, selected, onSelect, disabled }: Props) {
   return (
@@ -21,18 +63,8 @@ export function QuestionCard({ question, selected, onSelect, disabled }: Props) 
       <View style={styles.row}>
         {labels.map((_, i) => {
           const v = i + 1;
-          const active = selected === v;
           return (
-            <Pressable
-              key={v}
-              accessibilityRole="button"
-              accessibilityState={{ selected: active, disabled }}
-              disabled={disabled}
-              onPress={() => onSelect(v)}
-              style={[styles.dot, active && styles.dotActive, disabled && styles.dotDisabled]}
-            >
-              <Text style={[styles.dotText, active && styles.dotTextActive]}>{v}</Text>
-            </Pressable>
+            <ScalePill key={v} v={v} active={selected === v} disabled={disabled} onSelect={onSelect} />
           );
         })}
       </View>
@@ -42,14 +74,11 @@ export function QuestionCard({ question, selected, onSelect, disabled }: Props) 
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: space.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
+    ...cardPrimary,
     gap: space.md,
   },
   prompt: {
+    fontFamily: fontFamily.bodyMedium,
     fontSize: font.body,
     lineHeight: 24,
     color: colors.text,
@@ -60,36 +89,47 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   scaleHint: {
+    fontFamily: fontFamily.body,
     fontSize: font.caption,
+    fontWeight: '400',
     color: colors.textMuted,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: space.sm,
+    alignItems: 'center',
+    gap: 8,
   },
-  dot: {
+  pillWrap: {
     flex: 1,
-    paddingVertical: space.md,
-    borderRadius: radius.md,
+    maxWidth: 56,
+    alignItems: 'center',
+  },
+  pill: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.full,
     backgroundColor: colors.bg,
     alignItems: 'center',
-    borderWidth: 1,
+    justifyContent: 'center',
+    borderWidth: 1.5,
     borderColor: colors.border,
   },
-  dotActive: {
+  pillActive: {
     backgroundColor: colors.accentMuted,
     borderColor: colors.accent,
+    borderWidth: 2,
   },
-  dotDisabled: {
-    opacity: 0.5,
+  pillDisabled: {
+    opacity: 0.45,
   },
-  dotText: {
+  pillText: {
+    fontFamily: fontFamily.bodySemi,
     fontSize: font.body,
     fontWeight: '600',
     color: colors.text,
   },
-  dotTextActive: {
+  pillTextActive: {
     color: colors.accent,
   },
 });

@@ -1,14 +1,14 @@
+import { PrimaryButton } from '@/components/PrimaryButton';
 import { upsertProfile } from '@/lib/api';
 import { ageFromBirthDate } from '@/lib/age';
 import { supabase } from '@/lib/supabase';
-import { colors, font, radius, space } from '@/lib/theme';
+import { colors, font, fontFamily, radius, space } from '@/lib/theme';
 import { router, Stack } from 'expo-router';
 import { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -19,6 +19,8 @@ export default function NameDobScreen() {
   const [firstName, setFirstName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [loading, setLoading] = useState(false);
+  const [nameFocused, setNameFocused] = useState(false);
+  const [dobFocused, setDobFocused] = useState(false);
 
   async function onContinue() {
     const name = firstName.trim();
@@ -68,34 +70,36 @@ export default function NameDobScreen() {
       <Stack.Screen options={{ title: 'About you' }} />
       <Text style={styles.helper}>
         Your answers are used only to calculate compatibility with people you choose to connect with. We do not share
-        your answers with employers, advertisers, or any third party. You can delete your account and all your data
-        at any time from Settings.
+        your answers with employers, advertisers, or any third party. You can delete your account and all your data at
+        any time from Settings.
       </Text>
       <Text style={styles.label}>Your first name</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, nameFocused && styles.inputFocused]}
         value={firstName}
         onChangeText={setFirstName}
+        onFocus={() => setNameFocused(true)}
+        onBlur={() => setNameFocused(false)}
         placeholder="Alex"
         placeholderTextColor={colors.textMuted}
       />
       <Text style={styles.label}>Your birthday (age is shown, not full date)</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, dobFocused && styles.inputFocused]}
         value={birthDate}
         onChangeText={setBirthDate}
+        onFocus={() => setDobFocused(true)}
+        onBlur={() => setDobFocused(false)}
         placeholder="YYYY-MM-DD"
         placeholderTextColor={colors.textMuted}
         autoCapitalize="none"
       />
-      <Pressable
-        style={[styles.btn, loading && styles.btnDisabled]}
+      <PrimaryButton
+        label={loading ? 'Saving…' : 'Continue'}
         onPress={() => void onContinue()}
         disabled={loading}
-        accessibilityRole="button"
-      >
-        <Text style={styles.btnText}>{loading ? 'Saving…' : 'Continue'}</Text>
-      </Pressable>
+        style={styles.btnTop}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -108,12 +112,15 @@ const styles = StyleSheet.create({
     gap: space.sm,
   },
   helper: {
+    fontFamily: fontFamily.body,
     fontSize: font.small,
+    fontWeight: '400',
     lineHeight: 20,
     color: colors.textMuted,
     marginBottom: space.md,
   },
   label: {
+    fontFamily: fontFamily.bodySemi,
     fontSize: font.small,
     fontWeight: '600',
     color: colors.textMuted,
@@ -126,16 +133,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     paddingVertical: space.sm,
     fontSize: font.body,
+    fontFamily: fontFamily.body,
     backgroundColor: colors.surface,
     color: colors.text,
   },
-  btn: {
-    marginTop: space.lg,
-    backgroundColor: colors.accent,
-    paddingVertical: space.md,
-    borderRadius: radius.md,
-    alignItems: 'center',
+  inputFocused: {
+    borderColor: colors.accent,
+    borderWidth: 2,
   },
-  btnDisabled: { opacity: 0.6 },
-  btnText: { color: '#fff', fontWeight: '600', fontSize: font.body },
+  btnTop: { marginTop: space.lg },
 });

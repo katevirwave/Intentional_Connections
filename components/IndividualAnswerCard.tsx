@@ -1,4 +1,5 @@
-import { colors, font, radius, space } from '@/lib/theme';
+import { cardSecondary, colors, font, fontFamily, radius, space } from '@/lib/theme';
+import { hapticLight } from '@/lib/haptics';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 type Props = {
@@ -14,7 +15,14 @@ export function IndividualAnswerCard({ question, answer, read, onMarkRead }: Pro
       {!read && <View style={styles.dot} />}
       <Text style={styles.q}>{question}</Text>
       <Text style={styles.a}>{answer}</Text>
-      <Pressable style={styles.btn} onPress={onMarkRead} accessibilityRole="button">
+      <Pressable
+        style={styles.btn}
+        onPress={() => {
+          hapticLight();
+          onMarkRead();
+        }}
+        accessibilityRole="button"
+      >
         <Text style={styles.btnText}>{read ? 'Marked as read' : 'Mark as read'}</Text>
       </Pressable>
     </View>
@@ -23,11 +31,7 @@ export function IndividualAnswerCard({ question, answer, read, onMarkRead }: Pro
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: space.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
+    ...cardSecondary,
     gap: space.sm,
   },
   dot: {
@@ -38,12 +42,15 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   q: {
+    fontFamily: fontFamily.bodySemi,
     fontSize: font.small,
     fontWeight: '600',
     color: colors.textMuted,
   },
   a: {
+    fontFamily: fontFamily.body,
     fontSize: font.body,
+    fontWeight: '400',
     lineHeight: 24,
     color: colors.text,
   },
@@ -56,6 +63,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentMuted,
   },
   btnText: {
+    fontFamily: fontFamily.bodySemi,
     fontSize: font.small,
     fontWeight: '600',
     color: colors.accent,

@@ -1,4 +1,4 @@
-import { colors, font, radius, space } from '@/lib/theme';
+import { cardPrimary, colors, font, fontFamily, radius, space } from '@/lib/theme';
 import { StyleSheet, Text, View } from 'react-native';
 
 type Props = {
@@ -9,28 +9,42 @@ type Props = {
 export function InsightCard({ answer, insight }: Props) {
   return (
     <View style={styles.card}>
-      <Text style={styles.label}>Your answer: {answer}</Text>
-      <Text style={styles.body}>{insight}</Text>
+      <View style={styles.accentBar} />
+      <View style={styles.inner}>
+        <Text style={styles.label}>Your answer: {answer}</Text>
+        <Text style={styles.body}>{insight}</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
+    ...cardPrimary,
+    padding: 0,
+    gap: 0,
+  },
+  accentBar: {
+    height: 4,
+    width: '100%',
+    backgroundColor: colors.accent,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+  },
+  inner: {
     padding: space.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
     gap: space.sm,
   },
   label: {
+    fontFamily: fontFamily.bodySemi,
     fontSize: font.small,
     fontWeight: '600',
     color: colors.textMuted,
   },
   body: {
+    fontFamily: fontFamily.body,
     fontSize: font.body,
+    fontWeight: '400',
     lineHeight: 24,
     color: colors.text,
   },

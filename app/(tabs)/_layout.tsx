@@ -1,6 +1,7 @@
-import { colors } from '@/lib/theme';
+import { colors, fontFamily } from '@/lib/theme';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import { Platform } from 'react-native';
 
 export default function TabsLayout() {
   return (
@@ -9,9 +10,15 @@ export default function TabsLayout() {
         headerStyle: { backgroundColor: colors.bg },
         headerTintColor: colors.text,
         headerShadowVisible: false,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        headerTitleStyle: { fontFamily: fontFamily.headingSemi, fontSize: 17, fontWeight: '600' },
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+          ...(Platform.OS === 'ios' ? { height: 88 } : {}),
+        },
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
+        tabBarLabelStyle: { fontFamily: fontFamily.bodyMedium, fontSize: 11 },
       }}
     >
       <Tabs.Screen
@@ -19,7 +26,9 @@ export default function TabsLayout() {
         options={{
           title: 'Home',
           tabBarLabel: 'Home',
-          tabBarIcon: () => <Text>⌂</Text>,
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -27,7 +36,9 @@ export default function TabsLayout() {
         options={{
           title: 'You',
           tabBarLabel: 'You',
-          tabBarIcon: () => <Text>◎</Text>,
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

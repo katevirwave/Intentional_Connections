@@ -1,5 +1,6 @@
+import { PrimaryButton } from '@/components/PrimaryButton';
 import { useAppStore } from '@/lib/store';
-import { colors, font, radius, space } from '@/lib/theme';
+import { colors, font, fontFamily, radius, space } from '@/lib/theme';
 import { supabase } from '@/lib/supabase';
 import { Link, router, Stack } from 'expo-router';
 import { useState } from 'react';
@@ -7,7 +8,6 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -19,6 +19,8 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   async function onSubmit() {
     if (!email.trim() || password.length < 6) {
@@ -44,32 +46,34 @@ export default function SignUpScreen() {
       <Stack.Screen options={{ title: 'Create account' }} />
       <Text style={styles.label}>Email</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, emailFocused && styles.inputFocused]}
         autoCapitalize="none"
         keyboardType="email-address"
         autoComplete="email"
         value={email}
         onChangeText={setEmail}
+        onFocus={() => setEmailFocused(true)}
+        onBlur={() => setEmailFocused(false)}
         placeholder="you@example.com"
         placeholderTextColor={colors.textMuted}
       />
       <Text style={styles.label}>Password</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, passwordFocused && styles.inputFocused]}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
+        onFocus={() => setPasswordFocused(true)}
+        onBlur={() => setPasswordFocused(false)}
         placeholder="At least 6 characters"
         placeholderTextColor={colors.textMuted}
       />
-      <Pressable
-        style={[styles.btn, loading && styles.btnDisabled]}
+      <PrimaryButton
+        label={loading ? 'Creating…' : 'Continue'}
         onPress={() => void onSubmit()}
         disabled={loading}
-        accessibilityRole="button"
-      >
-        <Text style={styles.btnText}>{loading ? 'Creating…' : 'Continue'}</Text>
-      </Pressable>
+        style={styles.btnTop}
+      />
       <Link href="/(auth)/log-in" style={styles.link}>
         Already have an account? Log in
       </Link>
@@ -85,6 +89,7 @@ const styles = StyleSheet.create({
     gap: space.sm,
   },
   label: {
+    fontFamily: fontFamily.bodySemi,
     fontSize: font.small,
     fontWeight: '600',
     color: colors.textMuted,
@@ -97,17 +102,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     paddingVertical: space.sm,
     fontSize: font.body,
+    fontFamily: fontFamily.body,
     backgroundColor: colors.surface,
     color: colors.text,
   },
-  btn: {
-    marginTop: space.lg,
-    backgroundColor: colors.accent,
-    paddingVertical: space.md,
-    borderRadius: radius.md,
-    alignItems: 'center',
+  inputFocused: {
+    borderColor: colors.accent,
+    borderWidth: 2,
   },
-  btnDisabled: { opacity: 0.6 },
-  btnText: { color: '#fff', fontWeight: '600', fontSize: font.body },
-  link: { marginTop: space.md, color: colors.accent, fontSize: font.small },
+  btnTop: { marginTop: space.lg },
+  link: {
+    marginTop: space.md,
+    color: colors.accent,
+    fontSize: font.small,
+    fontFamily: fontFamily.bodySemi,
+    fontWeight: '600',
+  },
 });

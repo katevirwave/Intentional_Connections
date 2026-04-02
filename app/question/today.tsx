@@ -1,4 +1,5 @@
 import { InsightCard } from '@/components/InsightCard';
+import { PrimaryButton } from '@/components/PrimaryButton';
 import { QuestionCard } from '@/components/QuestionCard';
 import {
   fetchMyResponses,
@@ -10,20 +11,12 @@ import {
 import { DEMO_QUESTIONS, getNextDemoQuestion } from '@/lib/demoData';
 import { getSelfInsight } from '@/lib/questions';
 import { useAppStore } from '@/lib/store';
-import { colors, font, radius, space } from '@/lib/theme';
+import { colors, font, fontFamily, radius, space } from '@/lib/theme';
 import { useSession } from '@/hooks/useSession';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 type Phase = 'load' | 'question' | 'insight' | 'done_today';
 
@@ -38,6 +31,7 @@ export default function TodayQuestionScreen() {
   const [selected, setSelected] = useState<number | null>(null);
   const [textAnswer, setTextAnswer] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [textFocused, setTextFocused] = useState(false);
 
   const loadQuestion = useCallback(async () => {
     if (session === undefined) {
@@ -123,15 +117,15 @@ export default function TodayQuestionScreen() {
     return (
       <View style={styles.centerPad}>
         <Stack.Screen options={{ title: 'Today' }} />
-        <Text style={styles.doneTitle}>{demoMode ? 'Demo questions complete' : 'You are set for today'}</Text>
-        <Text style={styles.doneBody}>
-          {demoMode
-            ? 'Create an account to answer daily questions and connect with someone for real.'
-            : 'Come back tomorrow for the next question.'}
-        </Text>
-        <Pressable style={styles.btn} onPress={() => router.replace('/(tabs)')} accessibilityRole="button">
-          <Text style={styles.btnText}>Back home</Text>
-        </Pressable>
+        <Animated.View entering={FadeIn.duration(360)} style={styles.fadeBlock}>
+          <Text style={styles.doneTitle}>{demoMode ? 'Demo questions complete' : 'You are set for today'}</Text>
+          <Text style={styles.doneBody}>
+            {demoMode
+              ? 'Create an account to answer daily questions and connect with someone for real.'
+              : 'Come back tomorrow for the next question.'}
+          </Text>
+          <PrimaryButton label="Back home" onPress={() => router.replace('/(tabs)')} />
+        </Animated.View>
       </View>
     );
   }
@@ -140,10 +134,10 @@ export default function TodayQuestionScreen() {
     return (
       <ScrollView contentContainerStyle={styles.pad}>
         <Stack.Screen options={{ title: 'Insight' }} />
-        <InsightCard answer={selected} insight={getSelfInsight(question.id, selected)} />
-        <Pressable style={styles.btn} onPress={() => router.replace('/(tabs)')} accessibilityRole="button">
-          <Text style={styles.btnText}>That&apos;s me</Text>
-        </Pressable>
+        <Animated.View entering={FadeIn.duration(340)} style={styles.fadeCol}>
+          <InsightCard answer={selected} insight={getSelfInsight(question.id, selected)} />
+          <PrimaryButton label="That&apos;s me" onPress={() => router.replace('/(tabs)')} />
+        </Animated.View>
       </ScrollView>
     );
   }
@@ -162,42 +156,40 @@ export default function TodayQuestionScreen() {
   return (
     <ScrollView contentContainerStyle={styles.pad}>
       <Stack.Screen options={{ title: 'Today' }} />
-      {demoMode && (
-        <Text style={styles.demoHint}>Demo — this answer is stored only on this device.</Text>
-      )}
-      {isIndividual ? (
-        <>
-          <Text style={styles.prompt}>{question.question}</Text>
-          <TextInput
-            style={styles.textArea}
-            multiline
-            value={textAnswer}
-            onChangeText={setTextAnswer}
-            placeholder="Share as much as you like…"
-            placeholderTextColor={colors.textMuted}
-          />
-          <Pressable
-            style={[styles.btn, submitting && styles.btnDisabled]}
-            onPress={() => void onSubmitText()}
-            disabled={submitting}
-            accessibilityRole="button"
-          >
-            <Text style={styles.btnText}>{submitting ? 'Saving…' : 'Submit answer'}</Text>
-          </Pressable>
-        </>
-      ) : (
-        <>
-          <QuestionCard question={question.question} selected={selected} onSelect={setSelected} disabled={submitting} />
-          <Pressable
-            style={[styles.btn, (selected === null || submitting) && styles.btnDisabled]}
-            onPress={() => void onSubmitLikert()}
-            disabled={selected === null || submitting}
-            accessibilityRole="button"
-          >
-            <Text style={styles.btnText}>{submitting ? 'Saving…' : 'Submit answer'}</Text>
-          </Pressable>
-        </>
-      )}
+      <Animated.View entering={FadeIn.duration(320)} style={styles.fadeCol}>
+        {demoMode && (
+          <Text style={styles.demoHint}>Demo — this answer is stored only on this device.</Text>
+        )}
+        {isIndividual ? (
+          <>
+            <Text style={styles.prompt}>{question.question}</Text>
+            <TextInput
+              style={[styles.textArea, textFocused && styles.textAreaFocused]}
+              multiline
+              value={textAnswer}
+              onChangeText={setTextAnswer}
+              onFocus={() => setTextFocused(true)}
+              onBlur={() => setTextFocused(false)}
+              placeholder="Share as much as you like…"
+              placeholderTextColor={colors.textMuted}
+            />
+            <PrimaryButton
+              label={submitting ? 'Saving…' : 'Submit answer'}
+              onPress={() => void onSubmitText()}
+              disabled={submitting}
+            />
+          </>
+        ) : (
+          <>
+            <QuestionCard question={question.question} selected={selected} onSelect={setSelected} disabled={submitting} />
+            <PrimaryButton
+              label={submitting ? 'Saving…' : 'Submit answer'}
+              onPress={() => void onSubmitLikert()}
+              disabled={selected === null || submitting}
+            />
+          </>
+        )}
+      </Animated.View>
     </ScrollView>
   );
 }
@@ -212,13 +204,22 @@ const styles = StyleSheet.create({
     padding: space.lg,
     gap: space.md,
   },
+  fadeBlock: {
+    gap: space.md,
+    alignItems: 'center',
+    width: '100%',
+  },
+  fadeCol: { gap: space.md },
   pad: { padding: space.lg, gap: space.md, backgroundColor: colors.bg },
   demoHint: {
+    fontFamily: fontFamily.body,
     fontSize: font.caption,
+    fontWeight: '400',
     color: colors.textMuted,
     lineHeight: 18,
   },
   prompt: {
+    fontFamily: fontFamily.bodyMedium,
     fontSize: font.body,
     lineHeight: 24,
     fontWeight: '500',
@@ -231,18 +232,28 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     padding: space.md,
     fontSize: font.body,
+    fontFamily: fontFamily.body,
     backgroundColor: colors.surface,
     color: colors.text,
     textAlignVertical: 'top',
   },
-  btn: {
-    backgroundColor: colors.accent,
-    paddingVertical: space.md,
-    borderRadius: radius.md,
-    alignItems: 'center',
+  textAreaFocused: {
+    borderColor: colors.accent,
+    borderWidth: 2,
   },
-  btnDisabled: { opacity: 0.5 },
-  btnText: { color: '#fff', fontWeight: '600', fontSize: font.body },
-  doneTitle: { fontSize: font.title, fontWeight: '700', color: colors.text, textAlign: 'center' },
-  doneBody: { fontSize: font.body, color: colors.textMuted, textAlign: 'center' },
+  doneTitle: {
+    fontFamily: fontFamily.heading,
+    fontSize: font.title,
+    fontWeight: '700',
+    color: colors.text,
+    textAlign: 'center',
+  },
+  doneBody: {
+    fontFamily: fontFamily.body,
+    fontSize: font.body,
+    fontWeight: '400',
+    color: colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
 });

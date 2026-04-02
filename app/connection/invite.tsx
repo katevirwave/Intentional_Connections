@@ -5,12 +5,15 @@ import {
   fetchProfile,
   inviterTowardInviteeType,
 } from '@/lib/api';
+import { PrimaryButton } from '@/components/PrimaryButton';
+import { RelationshipChip } from '@/components/RelationshipChip';
 import { ageFromBirthDate } from '@/lib/age';
+import { hapticLight } from '@/lib/haptics';
 import { RELATIONSHIP_LABELS } from '@/lib/questions';
 import { useDemoGuardRedirectToTabs } from '@/hooks/useDemoGuard';
 import { supabase } from '@/lib/supabase';
 import type { RelationshipType } from '@/lib/types';
-import { colors, font, radius, space } from '@/lib/theme';
+import { colors, font, fontFamily, radius, shadows, space } from '@/lib/theme';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -136,27 +139,26 @@ export default function InviteScreen() {
           <Text style={styles.section}>How do you see them?</Text>
           <View style={styles.relRow}>
             {relOptions.map((r) => (
-              <Pressable
+              <RelationshipChip
                 key={r}
+                label={RELATIONSHIP_LABELS[r]}
+                selected={mine === r}
                 onPress={() => setMine(r)}
-                style={[styles.relChip, mine === r && styles.relChipOn]}
-                accessibilityRole="button"
-              >
-                <Text style={[styles.relChipText, mine === r && styles.relChipTextOn]}>{RELATIONSHIP_LABELS[r]}</Text>
-              </Pressable>
+              />
             ))}
           </View>
-          <Pressable
-            style={[styles.primary, busy && styles.disabled]}
+          <PrimaryButton
+            label={busy ? 'Working…' : 'Accept'}
             onPress={() => void onAccept()}
             disabled={busy}
-            accessibilityRole="button"
-          >
-            <Text style={styles.primaryText}>{busy ? 'Working…' : 'Accept'}</Text>
-          </Pressable>
+            style={styles.primaryGap}
+          />
           <Pressable
-            style={[styles.secondary, busy && styles.disabled]}
-            onPress={() => void onDecline()}
+            style={[styles.secondary, shadows.sm, busy && styles.disabled]}
+            onPress={() => {
+              hapticLight();
+              void onDecline();
+            }}
             disabled={busy}
             accessibilityRole="button"
           >
@@ -173,29 +175,29 @@ export default function InviteScreen() {
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
   container: { padding: space.lg, gap: space.md, backgroundColor: colors.bg },
-  headline: { fontSize: font.title, fontWeight: '700', color: colors.text, lineHeight: 30 },
-  body: { fontSize: font.body, lineHeight: 24, color: colors.textMuted },
-  section: { marginTop: space.md, fontWeight: '700', color: colors.text, fontSize: font.body },
-  relRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs },
-  relChip: {
-    paddingVertical: space.xs,
-    paddingHorizontal: space.sm,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+  headline: {
+    fontFamily: fontFamily.heading,
+    fontSize: font.title,
+    fontWeight: '700',
+    color: colors.text,
+    lineHeight: 30,
   },
-  relChipOn: { borderColor: colors.accent, backgroundColor: colors.accentMuted },
-  relChipText: { fontSize: font.caption, color: colors.text },
-  relChipTextOn: { color: colors.accent, fontWeight: '600' },
-  primary: {
+  body: {
+    fontFamily: fontFamily.body,
+    fontSize: font.body,
+    fontWeight: '400',
+    lineHeight: 24,
+    color: colors.textMuted,
+  },
+  section: {
     marginTop: space.md,
-    backgroundColor: colors.accent,
-    paddingVertical: space.md,
-    borderRadius: radius.md,
-    alignItems: 'center',
+    fontFamily: fontFamily.headingSemi,
+    fontWeight: '600',
+    color: colors.text,
+    fontSize: font.body,
   },
-  primaryText: { color: '#fff', fontWeight: '700', fontSize: font.body },
+  relRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs },
+  primaryGap: { marginTop: space.md },
   secondary: {
     paddingVertical: space.md,
     borderRadius: radius.md,
@@ -204,6 +206,11 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  secondaryText: { color: colors.text, fontWeight: '600', fontSize: font.body },
+  secondaryText: {
+    fontFamily: fontFamily.bodySemi,
+    color: colors.text,
+    fontWeight: '600',
+    fontSize: font.body,
+  },
   disabled: { opacity: 0.6 },
 });

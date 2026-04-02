@@ -3,16 +3,16 @@ import {
   fetchConnectionBetweenUsers,
   lookupShareCode,
 } from '@/lib/api';
+import { PrimaryButton } from '@/components/PrimaryButton';
 import { useDemoGuardRedirectToTabs } from '@/hooks/useDemoGuard';
 import { supabase } from '@/lib/supabase';
-import { colors, font, radius, space } from '@/lib/theme';
+import { colors, font, fontFamily, radius, space } from '@/lib/theme';
 import { router, Stack } from 'expo-router';
 import { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -23,6 +23,7 @@ export default function AddConnectionScreen() {
   useDemoGuardRedirectToTabs();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   async function onSubmit() {
     const c = code.trim().toUpperCase();
@@ -79,28 +80,33 @@ export default function AddConnectionScreen() {
       <Stack.Screen options={{ title: 'Add connection' }} />
       <Text style={styles.body}>Enter the code they shared with you.</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, focused && styles.inputFocused]}
         value={code}
         onChangeText={setCode}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         autoCapitalize="characters"
         placeholder="XK7-91R"
         placeholderTextColor={colors.textMuted}
       />
-      <Pressable
-        style={[styles.btn, loading && styles.btnDisabled]}
+      <PrimaryButton
+        label={loading ? 'Working…' : 'Continue'}
         onPress={() => void onSubmit()}
         disabled={loading}
-        accessibilityRole="button"
-      >
-        <Text style={styles.btnText}>{loading ? 'Working…' : 'Continue'}</Text>
-      </Pressable>
+      />
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg, padding: space.lg, gap: space.md },
-  body: { fontSize: font.body, color: colors.textMuted, lineHeight: 22 },
+  body: {
+    fontFamily: fontFamily.body,
+    fontSize: font.body,
+    fontWeight: '400',
+    color: colors.textMuted,
+    lineHeight: 22,
+  },
   input: {
     borderWidth: 1,
     borderColor: colors.border,
@@ -109,16 +115,13 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     fontSize: 22,
     letterSpacing: 2,
-    fontWeight: '700',
+    fontFamily: fontFamily.headingSemi,
+    fontWeight: '600',
     backgroundColor: colors.surface,
     color: colors.text,
   },
-  btn: {
-    backgroundColor: colors.accent,
-    paddingVertical: space.md,
-    borderRadius: radius.md,
-    alignItems: 'center',
+  inputFocused: {
+    borderColor: colors.accent,
+    borderWidth: 2,
   },
-  btnDisabled: { opacity: 0.6 },
-  btnText: { color: '#fff', fontWeight: '600', fontSize: font.body },
 });

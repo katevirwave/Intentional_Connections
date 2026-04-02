@@ -10,7 +10,7 @@ import { tendencyLine } from '@/lib/questions';
 import { computeMeaningfulGaps } from '@/lib/scoring';
 import { useDemoGuardRedirectToTabs } from '@/hooks/useDemoGuard';
 import { supabase } from '@/lib/supabase';
-import { colors, font, radius, space } from '@/lib/theme';
+import { cardSecondary, colors, font, fontFamily, radius, space } from '@/lib/theme';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -80,17 +80,41 @@ export default function DifferentScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: space.lg, gap: space.md, backgroundColor: colors.bg, paddingBottom: space.xl * 2 },
-  intro: { fontSize: font.small, lineHeight: 20, color: colors.textMuted },
-  muted: { fontSize: font.body, color: colors.textMuted },
+  intro: {
+    fontFamily: fontFamily.body,
+    fontSize: font.small,
+    fontWeight: '400',
+    lineHeight: 20,
+    color: colors.textMuted,
+  },
+  muted: {
+    fontFamily: fontFamily.body,
+    fontSize: font.body,
+    fontWeight: '400',
+    color: colors.textMuted,
+  },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
+    ...cardSecondary,
     padding: space.md,
-    borderWidth: 1,
-    borderColor: colors.border,
     gap: space.sm,
   },
-  q: { fontSize: font.body, fontWeight: '600', color: colors.text },
-  row: { fontSize: font.small, color: colors.textMuted },
-  body: { fontSize: font.body, lineHeight: 22, color: colors.text },
+  q: {
+    fontFamily: fontFamily.bodySemi,
+    fontSize: font.body,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  row: {
+    fontFamily: fontFamily.body,
+    fontSize: font.small,
+    fontWeight: '400',
+    color: colors.textMuted,
+  },
+  body: {
+    fontFamily: fontFamily.body,
+    fontSize: font.body,
+    fontWeight: '400',
+    lineHeight: 22,
+    color: colors.text,
+  },
 });

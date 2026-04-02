@@ -1,5 +1,5 @@
 import { useAppStore } from '@/lib/store';
-import { colors, font, radius, space } from '@/lib/theme';
+import { colors, font, fontFamily, radius, shadows, space } from '@/lib/theme';
 import { router, Stack } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -25,7 +25,7 @@ export default function SetupScreen() {
       </Text>
       <Pressable
         testID="setup-try-demo"
-        style={styles.demoBtn}
+        style={[styles.demoBtn, shadows.sm]}
         onPress={onTryDemo}
         accessibilityRole="button"
         accessibilityLabel="Try demo without Supabase"
@@ -46,12 +46,15 @@ const styles = StyleSheet.create({
     gap: space.md,
   },
   title: {
+    fontFamily: fontFamily.heading,
     fontSize: font.title,
     fontWeight: '700',
     color: colors.text,
   },
   body: {
+    fontFamily: fontFamily.body,
     fontSize: font.body,
+    fontWeight: '400',
     lineHeight: 24,
     color: colors.textMuted,
   },
@@ -70,13 +73,16 @@ const styles = StyleSheet.create({
     gap: space.xs,
   },
   demoBtnText: {
+    fontFamily: fontFamily.bodySemi,
     fontSize: font.body,
     fontWeight: '600',
     color: colors.accent,
     textAlign: 'center',
   },
   demoHint: {
+    fontFamily: fontFamily.body,
     fontSize: font.caption,
+    fontWeight: '400',
     color: colors.textMuted,
     textAlign: 'center',
     lineHeight: 18,
