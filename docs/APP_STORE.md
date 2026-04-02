@@ -49,6 +49,19 @@ npm run submit:ios
 
 Or build + submit in one flow from the EAS dashboard.
 
+### Sign in with Apple — refresh provisioning (required once)
+
+If EAS reports the **App Store provisioning profile doesn’t support Sign in with Apple**, the profile stored for this project is out of date. **Non-interactive / CI builds cannot fix this**; they skip Apple login, so capabilities are not re-synced.
+
+On **your Mac**, from this repo:
+
+1. Run `npm run build:ios` (no `--non-interactive`).
+2. When prompted, **log in to your Apple Developer account** and allow EAS to sync capabilities and **regenerate** the App Store provisioning profile.
+
+Or manually: [Identifiers](https://developer.apple.com/account/resources/identifiers/list) → your App ID → enable **Sign in with Apple** → Save; then run a new production build so EAS can create a matching profile.
+
+After a successful build: `npm run submit:ios`.
+
 ## App Store Connect (Apple’s website)
 
 1. Create the app record (same bundle ID as `app.json`).

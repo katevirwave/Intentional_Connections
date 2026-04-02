@@ -16,13 +16,15 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.intentionalconnections.app",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "infoPlist": {
         "CFBundleDisplayName": "Intentional Connections",
         "ITSAppUsesNonExemptEncryption": false
       },
       "entitlements": {
-        "com.apple.developer.applesignin": ["Default"]
+        "com.apple.developer.applesignin": [
+          "Default"
+        ]
       }
     },
     "android": {
